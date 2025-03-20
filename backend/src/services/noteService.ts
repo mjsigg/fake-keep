@@ -1,6 +1,7 @@
 import { Pool } from "pg";
-import { Note } from "../../types/note";
+import { Note, SavedNote } from "../../types/note";
 import dotenv from "dotenv";
+import { text } from "stream/consumers";
 dotenv.config();
 
 const pool = new Pool({
@@ -10,6 +11,13 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: Number(process.env.DB_PORT),
 });
+
+// notes table
+// title      | character varying(255)   |           |          |
+//  text_body  | text                     |           |          |
+//  created_on | timestamp with time zone |           |          | CURRENT_TIMESTAMP
+//  updated_on | timestamp with time zone |           |          | CURRENT_TIMESTAMP
+//  id
 
 export class NoteService {
   static async getAllNotes(): Promise<Note[]> {
@@ -46,6 +54,34 @@ export class NoteService {
     } catch (e) {
       console.error("Error deleting note:", e);
       throw e;
+    }
+  }
+
+  static async updateById(
+    id: string,
+    title: string,
+    text_body: string
+  ): Promise<boolean> {
+    try {
+      const query = `
+      UPDATE notes 
+        SET title = COALESCE($1, title), 
+        text_body = COALESCE($2, text_body), 
+        updated_on = CURRENT_TIMESTAMP
+      WHERE id = $3`;
+
+      console.log(
+        `Made it to updateByID, id: ${id}, title: ${{
+          title,
+        }}, text_body: ${text_body}`
+      );
+
+      const result = await pool.query(query, [title, text_body, id]);
+
+      return result.rowCount > 0; // Returns true if at least one row was updated
+    } catch (error) {
+      console.error("Error updating note:", error);
+      throw new Error("Failed to update note.");
     }
   }
 

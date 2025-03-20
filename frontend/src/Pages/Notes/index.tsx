@@ -1,8 +1,8 @@
 import NoteComponent from "../../Components/NoteComponent";
 import { useState, useRef, useEffect } from "react";
 import CreateNoteInputBar from "./CreateNoteInputBar";
+import { Note } from "../../../types";
 import * as FileService from "../../Services/NotesService";
-import { noteSchema, Note } from "../../../types";
 
 const NotesPage = () => {
   const [isClicked, setIsClicked] = useState<boolean>(false);
@@ -47,6 +47,8 @@ const NotesPage = () => {
           >
             <h1>{note.title}</h1>
             <h2>{note.text_body}</h2>
+            <h2>Created:{note.created_on}</h2>
+            <h2>Updated:{note.updated_on}</h2>
           </div>
         ))}
       </section>

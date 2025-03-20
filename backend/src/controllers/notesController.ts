@@ -48,3 +48,23 @@ export const deleteNoteById = async (req: Request, resp: Response) => {
     resp.status(500).json({ message: "Error deleting note", e });
   }
 };
+
+export const updateNotetById = async (req: Request, resp: Response) => {
+  try {
+    const { id } = req.params;
+    const { title, text_body } = req.body;
+    if (!req.params)
+      return resp
+        .status(400)
+        .json({ message: "Note object must be passed in" });
+
+    const updated = await NoteService.updateById(id, title, text_body);
+
+    if (!updated) return resp.status(404).json({ message: "Note not found" });
+
+    resp.status(200).json({ message: `${req.params} updated successfully` });
+  } catch (e) {
+    console.error("Error deleting note.", e);
+    resp.status(500).json({ message: "Error deleting note", e });
+  }
+};

@@ -47,3 +47,24 @@ export const deleteNoteById = async (id: string): Promise<void> => {
     throw error;
   }
 };
+
+export const updateNote = async (updatedNote: Partial<Note>): Promise<void> => {
+  try {
+    const { id, title, text_body } = updatedNote;
+    const response = await fetch(`${VITE_EXPRESS_URL}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title, text_body }),
+    });
+    console.log("Sending the update", updatedNote);
+
+    if (!response.ok) {
+      throw new Error("Error updating note.");
+    }
+  } catch (error) {
+    console.error("Error deleting note:", error);
+    throw error;
+  }
+};
