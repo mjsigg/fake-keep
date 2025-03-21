@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import * as NoteService from "../../Services/NotesService";
 import { Note } from "../../../types";
 
@@ -6,12 +7,14 @@ interface NoteProps {
   note?: Note;
   handleIsClicked: () => void;
   notesList: Note[];
+  setNotesList: Note[];
 }
 
 const NoteComponent: React.FC<NoteProps> = ({
   note,
   handleIsClicked,
   notesList,
+  setNotesList,
 }) => {
   const [noteVals, setNoteVals] = useState<Note>(
     note ? { ...note } : { title: "", text_body: "" }
@@ -20,29 +23,30 @@ const NoteComponent: React.FC<NoteProps> = ({
   const [isbodyEditing, setisbodyEditing] = useState<boolean>(false);
 
   const noteRef = useRef<HTMLFormElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = async (event: MouseEvent) => {
       if (noteRef.current && !noteRef.current.contains(event.target as Node)) {
-        if (noteVals.text_body.trim()) {
-          try {
-            if (!note) {
-              const returnedNote = await NoteService.addNote(noteVals);
-              console.log("Note created!", returnedNote);
-            } else {
-              const updatedNoteVals = { ...noteVals };
-              // this should be the update part. need to update the time too
-              console.log("Updating note....");
-              setNoteVals(updatedNoteVals);
-              await NoteService.updateNote(noteVals);
-            }
-            setNoteVals({ title: "", text_body: "" });
-            noteRef.current = null;
-            handleIsClicked();
-            // navigate("/notes");
-          } catch (e) {
-            console.error("Error saving note:", e);
+        try {
+          if (!note) {
+            const returnedNote = await NoteService.addNote(noteVals);
+            console.log("Note created!", returnedNote);
+          } else {
+            const updatedNoteVals = { ...noteVals };
+            // this should be the update part. need to update the time too
+            console.log("Updating note....");
+            setNoteVals(updatedNoteVals);
+            await NoteService.updateNote(noteVals);
+            const updatedList: Note[] = await NoteService.getAllNotes();
+            console.log("Updating within use effect after fetching list");
+            setNotesList(updatedList);
           }
+          setNoteVals({ title: "", text_body: "" });
+          handleIsClicked();
+          navigate("/");
+        } catch (e) {
+          console.error("Error saving note:", e);
         }
       }
     };
@@ -51,7 +55,7 @@ const NoteComponent: React.FC<NoteProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [noteVals, notesList, handleIsClicked, note]);
+  }, [noteVals, notesList, handleIsClicked, note, setNotesList, navigate]);
 
   return (
     <section
@@ -85,7 +89,7 @@ const NoteComponent: React.FC<NoteProps> = ({
           value={noteVals.text_body}
           autoFocus={isbodyEditing}
           onBlur={() => setisbodyEditing(false)}
-          placeholder="type here for a note"
+          placeholder="Note"
           onChange={(e) =>
             setNoteVals({ ...noteVals, text_body: e.target.value })
           }
@@ -110,22 +114,20 @@ const NoteComponent: React.FC<NoteProps> = ({
         <button
           onClick={async () => {
             try {
-              if (noteVals.text_body.trim().length > 0) {
-                console.log("hello?");
-                if (!note) {
-                  const returnedNote = await NoteService.addNote(noteVals);
-                  console.log("Note created!", returnedNote);
-                } else {
-                  console.log("we making it here?");
-                  const updatedNoteVals = { ...noteVals };
-                  setNoteVals(updatedNoteVals);
-                  await NoteService.updateNote(noteVals);
-                }
-                setNoteVals({ title: "", text_body: "" });
-                noteRef.current = null;
-                handleIsClicked();
-                // navigate("notes");
+              if (!note) {
+                const returnedNote = await NoteService.addNote(noteVals);
+                console.log("Note created!", returnedNote);
+              } else {
+                const updatedNoteVals = { ...noteVals };
+                setNoteVals(updatedNoteVals);
+                const updatedList: Note[] = await NoteService.getAllNotes();
+                setNotesList(updatedList);
+                navigate("/");
               }
+              setNoteVals({ title: "", text_body: "" });
+              noteRef.current = null;
+              handleIsClicked();
+              // navigate("notes");
             } catch (e) {
               console.error("Error saving note:", e);
             }

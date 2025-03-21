@@ -5,8 +5,8 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/note/:id" element={<NotesPage />} />
-          <Route path="/note" element={<NotesPage />} />
+          <Route path="/notes/:id" element={<NotesPage />} />
+          <Route path="/notes" element={<NotesPage />} />
           <Route path="/" element={<NotesPage />} />
         </Routes>
       </BrowserRouter>
