@@ -1,15 +1,14 @@
 import { Pool } from "pg";
-import { Note, SavedNote } from "../../types/note";
+import { Note } from "../../types/note";
 import dotenv from "dotenv";
-import { text } from "stream/consumers";
 dotenv.config();
 
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: Number(process.env.DB_PORT),
+  user: process.env.GCP_DB_USER || process.env.LOCAL_DB_DB_USER,
+  host: process.env.GCP_DB_HOST || process.env.LOCAL_DB_DB_HOST,
+  database: process.env.GCP_DB_NAME || process.env.LOCAL_DB_DB_NAME,
+  password: process.env.GCP_DB_PASSWORD || process.env.LOCAL_DB_DB_PASSWORD,
+  port: Number(process.env.GCP_DB_PORT || process.env.LOCAL_DB_DB_PORT),
 });
 
 // notes table
@@ -21,10 +20,18 @@ const pool = new Pool({
 
 export class NoteService {
   static async getAllNotes(): Promise<Note[]> {
-    const result = await pool.query(
-      "SELECT * FROM notes ORDER BY created_on DESC"
-    );
-    return result.rows; // Return the data to the controller
+    try {
+      const result = await pool.query(
+        "SELECT * FROM notes ORDER BY created_on DESC"
+      );
+
+      console.log("Fetched rows from DB:", result.rows); // 🔍 Debugging Log
+
+      return result.rows.length > 0 ? result.rows : []; // Ensure an empty array when no results
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+      return []; // Return empty array on error
+    }
   }
 
   static async createNote(title: string, text_body: string): Promise<Note> {
