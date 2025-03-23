@@ -2,4 +2,5 @@ Started working on this project to have to live with what I code and try to use 
 
 18Mar2025 - Cleaned up some db issues.  Been dealing with a lot of problems with not having the right key names.  I can really see why putting some thought into design is meaningful.  I think the next thing I should update is changing the modal portion to be move to a new url rathern than just a popup.
 19Mar2025 - Patch method implementation took a lot longer than I thought.  I need to get in the habit of thinking about hte shape of the data in the db to save time.  I keep updating the front and working backwards.  A diagram would problem help but at least all the basic crud is finished.
-20Mar20205 - Added functionality to be routed individual notes.  Only displays a modal at the moment.  Probably should solidfy how this routing will work especially since the params are being used on submittal.
+20Mar2025 - Added functionality to be routed individual notes.  Only displays a modal at the moment.  Probably should solidfy how this routing will work especially since the params are being used on submittal.
+23Mar2025 - Successfully linked GCP postgres db to the project. 
